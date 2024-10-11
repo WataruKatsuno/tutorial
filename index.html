@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>360度カメラ映像の送信</title>
+    <script src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
+</head>
+<body>
+    <h1>360度カメラ映像の送信</h1>
+    <video id="localStream" autoplay muted playsinline style="width: 100%; height: auto;"></video>
+    <p>あなたのPeerID: <span id="my-id"></span></p>
+    <input type="text" id="remote-id" placeholder="相手のPeerIDを入力">
+    <button onclick="startCall()">通話を開始</button>
+
+    <script>
+        // SkyWayのAPIトークンをここに設定
+        const apiKey = '4ff0a85b-4015-4e8b-94f6-4fab24c759e0';
+
+        // Peerオブジェクトの作成
+        const peer = new Peer({ key: apiKey, debug: 3 });
+
+        // 自分のPeerIDが生成されたら表示
+        peer.on('open', id => {
+            document.getElementById('my-id').textContent = id;
+        });
+
+        // 360度カメラの映像を取得して送信
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                width: 1920, // 解像度の設定 (360度映像用)
+                height: 960,
+                frameRate: 30
+            },
+            audio: true
+        })
+        .then(stream => {
+            document.getElementById('localStream').srcObject = stream;
+
+            window.startCall = () => {
+                const remotePeerId = document.getElementById('remote-id').value;
+                const call = peer.call(remotePeerId, stream);
+            };
+        })
+        .catch(error => {
+            console.error('360度カメラ映像の取得に失敗しました:', error);
+        });
+    </script>
+</body>
+</html>
